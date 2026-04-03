@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#0c0c0c"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-title" content="LUMIÈRE"/>
+<title>LUMIÈRE — 奢華水療 · 尊車服務</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#0c0c0c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;}
+body{display:flex;justify-content:center;align-items:center;}
+.app{width:100%;max-width:430px;height:100vh;max-height:100vh;background:#0c0c0c;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.statusbar{padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center;color:#aaa;font-size:12px;flex-shrink:0;background:#0c0c0c;}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.screen::-webkit-scrollbar{width:0;}
+.tabbar{display:flex;background:#111;border-top:0.5px solid #2a2a2a;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
+.tab{flex:1;padding:10px 4px 12px;border:none;background:none;color:#555;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .2s;position:relative;}
+.tab.active{color:#C9A84C;}
+.tab svg{width:20px;height:20px;}
+.gold{color:#C9A84C;}
+.card{background:#181818;border-radius:16px;border:0.5px solid #2a2a2a;padding:16px;}
+h1{font-family:'Palatino Linotype',Georgia,serif;font-size:28px;font-weight:400;color:#F5F0E8;letter-spacing:2px;}
+h2{font-family:'Palatino Linotype',Georgia,serif;font-size:18px;font-weight:400;color:#F5F0E8;}
+h3{font-size:12px;font-weight:500;color:#F5F0E8;letter-spacing:1px;text-transform:uppercase;}
+p{color:#999;font-size:13px;line-height:1.5;}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:0.5px;transition:opacity .2s;}
+.btn:active{opacity:.7;}
+.btn-gold{background:#C9A84C;color:#0c0c0c;}
+.btn-outline{background:transparent;border:0.5px solid #C9A84C;color:#C9A84C;}
+.input-field{background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#F5F0E8;font-size:14px;width:100%;outline:none;-webkit-appearance:none;}
+.input-field:focus{border-color:#C9A84C;}
+.time-slot{padding:10px 12px;border-radius:8px;border:0.5px solid #2a2a2a;font-size:13px;color:#888;cursor:pointer;text-align:center;transition:all .2s;}
+.time-slot.sel{border-color:#C9A84C;color:#C9A84C;background:rgba(201,168,76,.1);}
+.car-card{border-radius:14px;border:0.5px solid #2a2a2a;padding:14px;cursor:pointer;background:#181818;transition:border-color .2s;}
+.car-card.sel{border-color:#C9A84C;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:#2a2a2a;transition:background .3s;}
+.step-dot.active{background:#C9A84C;}
+.msg-bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
+.msg-in{background:#1e1e1e;color:#F5F0E8;border-bottom-left-radius:4px;align-self:flex-start;}
+.msg-out{background:#C9A84C;color:#0c0c0c;border-bottom-right-radius:4px;align-self:flex-end;}
+.badge{width:16px;height:16px;background:#C9A84C;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#0c0c0c;position:absolute;top:6px;right:calc(50% - 18px);}
+.spa-treat{cursor:pointer;}
+.spa-treat.sel{border-color:#C9A84C;}
+.quick-btn{background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:16px;padding:7px 14px;font-size:12px;color:#999;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.quick-btn:active{background:#2a2a2a;}
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#C9A84C;color:#0c0c0c;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Status Bar -->
+<div class="statusbar">
+  <span style="font-size:13px;font-weight:600;color:#F5F0E8;" id="clock">9:41</span>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="#aaa"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="#aaa"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" fill="#aaa"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="#C9A84C"/></svg>
+    <svg width="16" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3"/></svg>
+  </div>
+</div>
+
+<!-- Screen -->
+<div class="screen" id="mainscreen">
+
+  <!-- ========== HOME ========== -->
+  <div id="tab-home" style="padding:20px 20px 28px;">
+    <div style="margin-bottom:24px;">
+      <p style="color:#C9A84C;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">歡迎回來</p>
+      <h1>LUMIÈRE</h1>
+      <p style="margin-top:4px;font-size:12px;letter-spacing:1px;">奢華水療 · 尊車服務</p>
+    </div>
+    <div class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <p style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#C9A84C;margin-bottom:4px;">下次預約</p>
+        <h2 style="font-size:15px;">芳香療法水療</h2>
+        <p style="font-size:12px;margin-top:2px;" id="next-appt">暫無預約</p>
+      </div>
+      <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div class="card" style="cursor:pointer;" onclick="switchTab('spa')">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 style="font-size:12px;margin-bottom:4px;">水療預約</h3>
+        <p style="font-size:11px;">選擇您的療程</p>
+      </div>
+      <div class="card" style="cursor:pointer;" onclick="switchTab('car')">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2h-1"/><circle cx="9" cy="17" r="2"/><circle cx="19" cy="17" r="2"/><path d="M13 3v5h5"/></svg>
+        </div>
+        <h3 style="font-size:12px;margin-bottom:4px;">尊車接送</h3>
+        <p style="font-size:11px;">預訂專屬座駕</p>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;" onclick="switchTab('msg')">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <p style="font-size:13px;color:#F5F0E8;font-weight:500;">禮賓管家信息</p>
+          <p style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">陳小姐 · 您好，請問有什麼需要...</p>
+        </div>
+        <div style="background:rgba(201,168,76,.2);border-radius:10px;padding:2px 8px;font-size:11px;color:#C9A84C;flex-shrink:0;" id="home-badge">2 則</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SPA ========== -->
+  <div id="tab-spa" style="display:none;padding:20px;">
+    <p style="color:#C9A84C;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">尊享療程</p>
+    <h2 style="margin-bottom:20px;">水療預約</h2>
+    <div style="display:flex;gap:6px;margin-bottom:20px;" id="spa-steps">
+      <div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="spa-step1">
+      <h3 style="margin-bottom:12px;">選擇療程</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <div class="card spa-treat sel" data-t="熱石按摩" data-d="深度肌肉放鬆 · 90分鐘" onclick="selectTreat(this)" style="border-color:#C9A84C;">
+          <h2 style="font-size:15px;margin-bottom:4px;">熱石按摩</h2>
+          <p style="font-size:12px;">深度肌肉放鬆 · 90分鐘</p>
+        </div>
+        <div class="card spa-treat" data-t="芳香療法" data-d="精油舒緩 · 60分鐘" onclick="selectTreat(this)">
+          <h2 style="font-size:15px;margin-bottom:4px;">芳香療法</h2>
+          <p style="font-size:12px;">精油舒緩 · 60分鐘</p>
+        </div>
+        <div class="card spa-treat" data-t="雙人水療套餐" data-d="情侶專屬體驗 · 120分鐘" onclick="selectTreat(this)">
+          <h2 style="font-size:15px;margin-bottom:4px;">雙人水療套餐</h2>
+          <p style="font-size:12px;">情侶專屬體驗 · 120分鐘</p>
+        </div>
+        <div class="card spa-treat" data-t="頭皮深層護理" data-d="深層清潔修護 · 45分鐘" onclick="selectTreat(this)">
+          <h2 style="font-size:15px;margin-bottom:4px;">頭皮深層護理</h2>
+          <p style="font-size:12px;">深層清潔修護 · 45分鐘</p>
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="goSpaStep(2)">選擇日期時間 →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="spa-step2" style="display:none;">
+      <h3 style="margin-bottom:12px;">選擇日期</h3>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px;" id="date-grid"></div>
+      <h3 style="margin-bottom:12px;">選擇時段</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px;" id="time-grid">
+        <div class="time-slot sel" onclick="selTime(this,'上午 10:00')">10:00</div>
+        <div class="time-slot" onclick="selTime(this,'上午 11:00')">11:00</div>
+        <div class="time-slot" onclick="selTime(this,'下午 1:00')">13:00</div>
+        <div class="time-slot" onclick="selTime(this,'下午 2:00')">14:00</div>
+        <div class="time-slot" onclick="selTime(this,'下午 3:00')">15:00</div>
+        <div class="time-slot" onclick="selTime(this,'下午 4:30')">16:30</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="goSpaStep(1)">返回</button>
+        <button class="btn btn-gold" style="flex:2;" onclick="goSpaStep(3)">確認預約</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="spa-step3" style="display:none;text-align:center;padding:20px 0;">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 style="margin-bottom:8px;">預約確認！</h2>
+      <p style="margin-bottom:24px;font-size:13px;">管家稍後將透過信息與您確認</p>
+      <div class="card" style="text-align:left;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #2a2a2a;">
+          <p style="font-size:13px;">療程</p><p style="font-size:13px;color:#F5F0E8;" id="conf-treat">熱石按摩</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #2a2a2a;">
+          <p style="font-size:13px;">日期</p><p style="font-size:13px;color:#F5F0E8;" id="conf-date">—</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;">
+          <p style="font-size:13px;">時間</p><p style="font-size:13px;color:#F5F0E8;" id="conf-time">上午 10:00</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="goSpaStep(1)">再預約</button>
+        <button class="btn btn-gold" style="flex:1;" onclick="switchTab('msg')">聯絡管家</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CAR ========== -->
+  <div id="tab-car" style="display:none;padding:20px;">
+    <p style="color:#C9A84C;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">專屬座駕</p>
+    <h2 style="margin-bottom:20px;">尊車預訂</h2>
+
+    <div id="car-form">
+      <h3 style="margin-bottom:10px;">出發地點</h3>
+      <input class="input-field" id="car-from" style="margin-bottom:16px;" placeholder="輸入接送地址..."/>
+      <h3 style="margin-bottom:10px;">目的地</h3>
+      <input class="input-field" id="car-to" style="margin-bottom:16px;" placeholder="輸入目的地..."/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div>
+          <h3 style="margin-bottom:10px;">日期</h3>
+          <input class="input-field" type="date" id="car-date"/>
+        </div>
+        <div>
+          <h3 style="margin-bottom:10px;">時間</h3>
+          <input class="input-field" type="time" id="car-time" value="15:00"/>
+        </div>
+      </div>
+      <h3 style="margin-bottom:12px;">選擇車款</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+        <div class="car-card sel" onclick="selCar(this,'Mercedes S-Class','行政轎車')">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div style="width:44px;height:30px;border-radius:6px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M2 10h20M6 10V7l3-4h6l3 4v3"/><circle cx="7" cy="11.5" r="1.5"/><circle cx="17" cy="11.5" r="1.5"/></svg>
+            </div>
+            <div>
+              <p style="font-size:14px;color:#F5F0E8;font-weight:500;">行政轎車</p>
+              <p style="font-size:12px;">Mercedes S-Class · 最多4位</p>
+            </div>
+          </div>
+        </div>
+        <div class="car-card" onclick="selCar(this,'Bentley Bentayga','豪華 SUV')">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div style="width:44px;height:30px;border-radius:6px;background:#1e1e1e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="#666" stroke-width="1.5"><path d="M2 10h20M4 10V6l4-5h8l4 5v4"/><circle cx="7" cy="11.5" r="1.5"/><circle cx="17" cy="11.5" r="1.5"/></svg>
+            </div>
+            <div>
+              <p style="font-size:14px;color:#F5F0E8;font-weight:500;">豪華 SUV</p>
+              <p style="font-size:12px;">Bentley Bentayga · 最多6位</p>
+            </div>
+          </div>
+        </div>
+        <div class="car-card" onclick="selCar(this,'Rolls-Royce Phantom','加長禮賓車')">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div style="width:44px;height:30px;border-radius:6px;background:#1e1e1e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="24" height="14" viewBox="0 0 26 14" fill="none" stroke="#666" stroke-width="1.5"><path d="M2 10h22M5 10V7l2-4h12l2 4v3"/><circle cx="7" cy="11.5" r="1.5"/><circle cx="19" cy="11.5" r="1.5"/></svg>
+            </div>
+            <div>
+              <p style="font-size:14px;color:#F5F0E8;font-weight:500;">加長禮賓車</p>
+              <p style="font-size:12px;">Rolls-Royce Phantom · 最多6位</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="confirmCar()">立即預訂</button>
+    </div>
+
+    <div id="car-confirm" style="display:none;text-align:center;padding:30px 0;">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 style="margin-bottom:8px;">座駕已確認！</h2>
+      <p style="font-size:13px;margin-bottom:24px;">司機將提前15分鐘發送信息通知</p>
+      <div class="card" style="text-align:left;margin-bottom:20px;">
+        <div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid #2a2a2a;">
+          <div style="width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 018 0v2"/></svg>
+          </div>
+          <div>
+            <p style="font-size:12px;color:#666;">您的司機</p>
+            <p style="font-size:14px;color:#F5F0E8;font-weight:500;">張偉明</p>
+            <p style="font-size:12px;color:#C9A84C;">★★★★★ 5.0分</p>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #2a2a2a;">
+          <p style="font-size:13px;">車款</p><p style="font-size:13px;color:#F5F0E8;" id="conf-car">Mercedes S-Class</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #2a2a2a;">
+          <p style="font-size:13px;">出發</p><p style="font-size:13px;color:#F5F0E8;" id="conf-from">—</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;">
+          <p style="font-size:13px;">車牌</p><p style="font-size:13px;color:#F5F0E8;">HK · AA 8888</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="resetCar()">返回</button>
+        <button class="btn btn-gold" style="flex:1;" onclick="switchTab('msg')">聯絡司機</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MESSAGES ========== -->
+  <div id="tab-msg" style="display:none;height:100%;flex-direction:column;">
+    <div style="padding:14px 20px 12px;border-bottom:0.5px solid #2a2a2a;flex-shrink:0;">
+      <p style="color:#C9A84C;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">禮賓服務</p>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 018 0v2"/></svg>
+        </div>
+        <div>
+          <p style="font-size:14px;color:#F5F0E8;font-weight:500;">陳小姐 · 專屬管家</p>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:6px;height:6px;border-radius:50%;background:#4CAF50;"></div>
+            <p style="font-size:12px;color:#4CAF50;">在線服務中</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="chat-area" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:6px;min-height:0;"></div>
+    <div style="padding:10px 16px 14px;border-top:0.5px solid #2a2a2a;background:#0c0c0c;flex-shrink:0;">
+      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;">
+        <button class="quick-btn" onclick="quickMsg('我想查詢預約詳情')">查詢預約</button>
+        <button class="quick-btn" onclick="quickMsg('需要更改預約時間')">更改時間</button>
+        <button class="quick-btn" onclick="quickMsg('安排接送服務')">安排接送</button>
+        <button class="quick-btn" onclick="quickMsg('有特別需求想告知')">特別需求</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="msg-input" class="input-field" style="flex:1;border-radius:20px;padding:11px 16px;" placeholder="輸入信息..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+        <button onclick="sendMsg()" style="width:42px;height:42px;border-radius:50%;background:#C9A84C;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /screen -->
+
+<!-- Tab Bar -->
+<div class="tabbar">
+  <button class="tab active" id="btn-home" onclick="switchTab('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>首頁
+  </button>
+  <button class="tab" id="btn-spa" onclick="switchTab('spa')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>水療
+  </button>
+  <button class="tab" id="btn-car" onclick="switchTab('car')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2h-1"/><circle cx="9" cy="17" r="2"/><circle cx="19" cy="17" r="2"/><path d="M13 3v5h5"/></svg>豪車
+  </button>
+  <button class="tab" id="btn-msg" onclick="switchTab('msg')" style="position:relative;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <div class="badge" id="msg-badge">2</div>
+    信息
+  </button>
+</div>
+
+</div><!-- /app -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+var state = {
+  treat: '熱石按摩',
+  treatDesc: '深度肌肉放鬆 · 90分鐘',
+  date: '',
+  time: '上午 10:00',
+  car: 'Mercedes S-Class',
+  carType: '行政轎車',
+  msgBadge: 2
+};
+
+// ── Clock ──────────────────────────────────────────────
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours(), m = now.getMinutes();
+  document.getElementById('clock').textContent =
+    (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// ── Toast ──────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ── Tab switch ──────────────────────────────────────────
+function switchTab(t) {
+  ['home','spa','car','msg'].forEach(function(id) {
+    var el = document.getElementById('tab-' + id);
+    el.style.display = 'none';
+    document.getElementById('btn-' + id).classList.remove('active');
+  });
+  var target = document.getElementById('tab-' + t);
+  if (t === 'msg') {
+    target.style.display = 'flex';
+    if (state.msgBadge > 0) {
+      state.msgBadge = 0;
+      document.getElementById('msg-badge').style.display = 'none';
+      document.getElementById('home-badge').style.display = 'none';
+    }
+    renderChat();
+    setTimeout(function(){
+      var a = document.getElementById('chat-area');
+      a.scrollTop = a.scrollHeight;
+    }, 60);
+  } else {
+    target.style.display = 'block';
+    document.getElementById('mainscreen').scrollTop = 0;
+  }
+  document.getElementById('btn-' + t).classList.add('active');
+}
+
+// ── Spa ────────────────────────────────────────────────
+function selectTreat(el) {
+  document.querySelectorAll('.spa-treat').forEach(function(c) {
+    c.classList.remove('sel'); c.style.borderColor = '';
+  });
+  el.classList.add('sel'); el.style.borderColor = '#C9A84C';
+  state.treat = el.getAttribute('data-t');
+  state.treatDesc = el.getAttribute('data-d');
+}
+
+function goSpaStep(n) {
+  document.getElementById('spa-step1').style.display = 'none';
+  document.getElementById('spa-step2').style.display = 'none';
+  document.getElementById('spa-step3').style.display = 'none';
+  document.getElementById('spa-step' + n).style.display = 'block';
+  document.querySelectorAll('#spa-steps .step-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i < n);
+  });
+  if (n === 3) {
+    document.getElementById('conf-treat').textContent = state.treat;
+    document.getElementById('conf-time').textContent = state.time;
+    document.getElementById('conf-date').textContent = state.date || '今日';
+    document.getElementById('next-appt').textContent = state.treat + ' · ' + (state.date || '今日') + ' ' + state.time;
+    addMsg('in', '✨ 您的「' + state.treat + '」預約已確認！時間：' + (state.date||'今日') + ' ' + state.time + '。如有特別安排請隨時告知。');
+    showToast('預約成功！');
+  }
+  document.getElementById('mainscreen').scrollTop = 0;
+}
+
+function selTime(el, label) {
+  document.querySelectorAll('.time-slot').forEach(function(t){ t.classList.remove('sel'); });
+  el.classList.add('sel');
+  state.time = label;
+}
+
+// ── Car ────────────────────────────────────────────────
+function selCar(el, model, type) {
+  document.querySelectorAll('.car-card').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  state.car = model; state.carType = type;
+}
+
+function confirmCar() {
+  var from = document.getElementById('car-from').value.trim();
+  var to = document.getElementById('car-to').value.trim();
+  if (!from || !to) { showToast('請填寫出發地點及目的地'); return; }
+  document.getElementById('conf-car').textContent = state.car;
+  document.getElementById('conf-from').textContent = from;
+  document.getElementById('car-form').style.display = 'none';
+  document.getElementById('car-confirm').style.display = 'block';
+  document.getElementById('mainscreen').scrollTop = 0;
+  addMsg('in', '🚗 您的「' + state.carType + ' — ' + state.car + '」已確認！\n出發：' + from + '\n目的地：' + to + '\n司機張偉明將提前聯絡您，請保持電話暢通。');
+  showToast('座駕已確認！');
+}
+
+function resetCar() {
+  document.getElementById('car-form').style.display = 'block';
+  document.getElementById('car-confirm').style.display = 'none';
+}
+
+// ── Messages ───────────────────────────────────────────
+var chatHistory = [
+  { from:'in', text:'您好！我是您的專屬禮賓管家陳小姐，很榮幸為您服務 🌹', time: timeStr() },
+  { from:'in', text:'您的水療預約已確認，如有任何需要請隨時告知。', time: timeStr() }
+];
+
+var replies = {
+  '我想查詢預約詳情': '您好！您目前有一個預約：芳香療法，今日下午3:00。如需更改請隨時告知 🌸',
+  '需要更改預約時間': '請問您希望改到哪個時段？我們的可用時間為每日 10:00–18:00，我來為您安排。',
+  '安排接送服務': '好的！請問接送地址和時間？我們的豪華車隊隨時候命，確保您舒適出行。',
+  '有特別需求想告知': '請放心告知，我們的禮賓團隊會盡力滿足您的每個需求，一切以您的舒適為優先。'
+};
+
+function timeStr() {
+  var now = new Date();
+  var h = now.getHours(), m = now.getMinutes();
+  return (h < 12 ? '上午 ' : '下午 ') + (h%12||12) + ':' + (m<10?'0':'') + m;
+}
+
+function addMsg(from, text) {
+  chatHistory.push({ from: from, text: text, time: timeStr() });
+}
+
+function renderChat() {
+  var area = document.getElementById('chat-area');
+  area.innerHTML = '';
+  chatHistory.forEach(function(m) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' +
+      (m.from==='out' ? 'flex-end' : 'flex-start') + ';';
+    var time = document.createElement('p');
+    time.style.cssText = 'font-size:10px;color:#555;margin-bottom:3px;' +
+      (m.from==='out' ? 'text-align:right;' : '');
+    time.textContent = m.time;
+    var bubble = document.createElement('div');
+    bubble.className = 'msg-bubble ' + (m.from==='out' ? 'msg-out' : 'msg-in');
+    bubble.style.whiteSpace = 'pre-line';
+    bubble.textContent = m.text;
+    wrap.appendChild(time);
+    wrap.appendChild(bubble);
+    area.appendChild(wrap);
+  });
+  area.scrollTop = area.scrollHeight;
+}
+
+function sendMsg() {
+  var input = document.getElementById('msg-input');
+  var text = input.value.trim();
+  if (!text) return;
+  addMsg('out', text);
+  renderChat();
+  input.value = '';
+  var reply = replies[text] || '感謝您的信息！我已收到，稍後會為您詳細跟進。如有緊急需要請致電服務熱線。';
+  setTimeout(function() {
+    addMsg('in', reply);
+    renderChat();
+  }, 800);
+}
+
+function quickMsg(text) {
+  document.getElementById('msg-input').value = text;
+  sendMsg();
+}
+
+// ── Date Grid ──────────────────────────────────────────
+(function initDates() {
+  var grid = document.getElementById('date-grid');
+  ['日','一','二','三','四','五','六'].forEach(function(d) {
+    var h = document.createElement('div');
+    h.style.cssText = 'text-align:center;font-size:10px;color:#555;padding:4px 0;';
+    h.textContent = d; grid.appendChild(h);
+  });
+  var today = new Date();
+  var y = today.getFullYear(), mo = today.getMonth();
+  var startDay = new Date(y, mo, 1).getDay();
+  var dim = new Date(y, mo+1, 0).getDate();
+  var months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  for (var i = 0; i < startDay; i++) { grid.appendChild(document.createElement('div')); }
+  for (var d = 1; d <= dim; d++) {
+    (function(day) {
+      var el = document.createElement('div');
+      el.textContent = day;
+      var past = day < today.getDate();
+      el.style.cssText = 'text-align:center;padding:7px 2px;font-size:13px;border-radius:6px;transition:all .2s;' +
+        'color:' + (past ? '#3a3a3a' : '#999') + ';cursor:' + (past ? 'default' : 'pointer') + ';';
+      if (day === today.getDate()) {
+        el.style.background = 'rgba(201,168,76,.2)';
+        el.style.color = '#C9A84C'; el.style.fontWeight = '500';
+        state.date = months[mo] + day + '日';
+      }
+      if (!past) {
+        el.onclick = function() {
+          document.querySelectorAll('#date-grid > div').forEach(function(x) {
+            x.style.background = ''; x.style.color = '#999'; x.style.fontWeight = '';
+          });
+          el.style.background = 'rgba(201,168,76,.2)';
+          el.style.color = '#C9A84C'; el.style.fontWeight = '500';
+          state.date = months[mo] + day + '日';
+        };
+      }
+      grid.appendChild(el);
+    })(d);
+  }
+  // Set default car date
+  var pad = function(n){ return (n<10?'0':'')+n; };
+  document.getElementById('car-date').value = y+'-'+pad(mo+1)+'-'+pad(today.getDate());
+})();
+</script>
+</body>
+</html>
