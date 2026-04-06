@@ -10,9 +10,9 @@
 <title>水療官方平台</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#0c0c0c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;}
+html,body{height:100%;height:-webkit-fill-available;background:#0c0c0c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;}
 body{display:flex;justify-content:center;align-items:center;}
-.app{width:100%;max-width:430px;height:100vh;background:#0c0c0c;display:flex;flex-direction:column;overflow:hidden;}
+.app{width:100%;max-width:430px;height:100vh;height:-webkit-fill-available;height:100dvh;background:#0c0c0c;display:flex;flex-direction:column;overflow:hidden;}
 .statusbar{padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#0c0c0c;}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
 .screen::-webkit-scrollbar{width:0;}
@@ -45,6 +45,13 @@ p{color:#999;font-size:13px;line-height:1.5;}
 .spa-treat{cursor:pointer;}
 .spa-treat.sel{border-color:#C9A84C;}
 .quick-btn{background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:16px;padding:7px 14px;font-size:12px;color:#999;cursor:pointer;white-space:nowrap;}
+
+.otp-input{width:48px;height:56px;background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:10px;text-align:center;font-size:22px;font-weight:600;color:#F5F0E8;outline:none;}
+.otp-input:focus{border-color:#C9A84C;}
+.country-btn{background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:10px 0 0 10px;padding:12px 14px;color:#F5F0E8;font-size:14px;cursor:pointer;white-space:nowrap;}
+.phone-input{background:#1e1e1e;border:0.5px solid #2a2a2a;border-left:none;border-radius:0 10px 10px 0;padding:12px 14px;color:#F5F0E8;font-size:14px;flex:1;outline:none;}
+.phone-input:focus{border-color:#C9A84C;}
+
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#C9A84C;color:#0c0c0c;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .lang-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
@@ -317,6 +324,112 @@ p{color:#999;font-size:13px;line-height:1.5;}
   <div id="svc-list"></div>
 </div>
 
+
+<!-- MEMBER -->
+<div id="tab-member" style="display:none;padding:20px 20px 28px;">
+  <!-- Login View -->
+  <div id="member-login-view">
+    <div style="text-align:center;padding:30px 0 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 018 0v2"/></svg>
+      </div>
+      <h1 style="font-size:22px;margin-bottom:6px;" id="t-memberTitle">會員登入</h1>
+      <p style="font-size:13px;" id="t-memberSub">輸入手機號碼接收驗證碼</p>
+    </div>
+
+    <div id="phone-step">
+      <h3 style="margin-bottom:10px;" id="t-selectRegion">選擇地區</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;" id="region-grid">
+        <div class="card region-btn active" data-code="+853" data-name="🇲🇴 澳門" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;border-color:#C9A84C;text-align:center;">
+          <p style="font-size:16px;margin-bottom:2px;">🇲🇴</p>
+          <p style="font-size:13px;color:#F5F0E8;">澳門</p>
+          <p style="font-size:11px;color:#C9A84C;">+853</p>
+        </div>
+        <div class="card region-btn" data-code="+852" data-name="🇭🇰 香港" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;text-align:center;">
+          <p style="font-size:16px;margin-bottom:2px;">🇭🇰</p>
+          <p style="font-size:13px;color:#F5F0E8;">香港</p>
+          <p style="font-size:11px;color:#666;">+852</p>
+        </div>
+        <div class="card region-btn" data-code="+886" data-name="🇹🇼 台灣" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;text-align:center;">
+          <p style="font-size:16px;margin-bottom:2px;">🇹🇼</p>
+          <p style="font-size:13px;color:#F5F0E8;">台灣</p>
+          <p style="font-size:11px;color:#666;">+886</p>
+        </div>
+        <div class="card region-btn" data-code="+86" data-name="🇨🇳 中國大陸" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;text-align:center;">
+          <p style="font-size:16px;margin-bottom:2px;">🇨🇳</p>
+          <p style="font-size:13px;color:#F5F0E8;">中國大陸</p>
+          <p style="font-size:11px;color:#666;">+86</p>
+        </div>
+        <div class="card region-btn" data-code="+81" data-name="🇯🇵 日本" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;text-align:center;">
+          <p style="font-size:16px;margin-bottom:2px;">🇯🇵</p>
+          <p style="font-size:13px;color:#F5F0E8;">日本</p>
+          <p style="font-size:11px;color:#666;">+81</p>
+        </div>
+        <div class="card region-btn" data-code="+82" data-name="🇰🇷 韓國" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;text-align:center;">
+          <p style="font-size:16px;margin-bottom:2px;">🇰🇷</p>
+          <p style="font-size:13px;color:#F5F0E8;">韓國</p>
+          <p style="font-size:11px;color:#666;">+82</p>
+        </div>
+        <div class="card region-btn" data-code="+1" data-name="🌍 其他國際" onclick="selectRegion(this)" style="padding:12px;cursor:pointer;text-align:center;grid-column:span 2;">
+          <p style="font-size:13px;color:#F5F0E8;">🌍 其他國際地區</p>
+          <p style="font-size:11px;color:#666;">+1 / +44 / ...</p>
+        </div>
+      </div>
+      <h3 style="margin-bottom:10px;" id="t-phoneNumber">手機號碼</h3>
+      <div style="display:flex;margin-bottom:20px;">
+        <div id="selected-code" style="background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:10px 0 0 10px;padding:12px 14px;color:#C9A84C;font-size:14px;font-weight:500;white-space:nowrap;">+853</div>
+        <input id="phone-input" type="tel" class="phone-input" placeholder="輸入手機號碼"/>
+      </div>
+      <button class="btn btn-gold" onclick="sendOTP()" id="t-sendOTP">發送驗證碼</button>
+    </div>
+
+    <div id="otp-step" style="display:none;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <p style="font-size:14px;color:#F5F0E8;margin-bottom:4px;" id="otp-sent-to">驗證碼已發送至</p>
+        <p style="font-size:16px;color:#C9A84C;font-weight:500;" id="otp-phone-display"></p>
+        <p style="font-size:12px;margin-top:8px;" id="t-otpExpire">驗證碼將於5分鐘後失效</p>
+      </div>
+      <h3 style="margin-bottom:16px;text-align:center;" id="t-enterOTP">輸入6位驗證碼</h3>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px;">
+        <input class="otp-input" id="otp1" maxlength="1" type="number" oninput="otpNext(this,'otp2')"/>
+        <input class="otp-input" id="otp2" maxlength="1" type="number" oninput="otpNext(this,'otp3')"/>
+        <input class="otp-input" id="otp3" maxlength="1" type="number" oninput="otpNext(this,'otp4')"/>
+        <input class="otp-input" id="otp4" maxlength="1" type="number" oninput="otpNext(this,'otp5')"/>
+        <input class="otp-input" id="otp5" maxlength="1" type="number" oninput="otpNext(this,'otp6')"/>
+        <input class="otp-input" id="otp6" maxlength="1" type="number" oninput="otpNext(this,null)"/>
+      </div>
+      <button class="btn btn-gold" onclick="verifyOTP()" id="t-verifyOTP" style="margin-bottom:12px;">確認驗證</button>
+      <button class="btn btn-outline" onclick="backToPhone()" id="t-resend">重新發送</button>
+    </div>
+  </div>
+
+  <!-- Logged In View -->
+  <div id="member-loggedin-view" style="display:none;">
+    <div style="text-align:center;padding:24px 0 20px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 018 0v2"/></svg>
+      </div>
+      <p style="font-size:14px;color:#C9A84C;font-weight:500;" id="member-welcome">歡迎回來！</p>
+      <p style="font-size:18px;color:#F5F0E8;font-weight:500;margin-top:4px;" id="member-phone"></p>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #2a2a2a;">
+        <p style="font-size:13px;">會員狀態</p>
+        <p style="font-size:13px;color:#C9A84C;font-weight:500;">已驗證 ✓</p>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #2a2a2a;">
+        <p style="font-size:13px;" id="t-myBookings">我的預約</p>
+        <p style="font-size:13px;color:#F5F0E8;" id="member-booking-count">0 個</p>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;">
+        <p style="font-size:13px;">登入時間</p>
+        <p style="font-size:13px;color:#F5F0E8;" id="member-login-time"></p>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="logout()" id="t-logout">登出</button>
+  </div>
+</div>
+
 </div><!-- /screen -->
 
 <!-- Tabbar -->
@@ -333,9 +446,10 @@ p{color:#999;font-size:13px;line-height:1.5;}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2h-1"/><circle cx="9" cy="17" r="2"/><circle cx="19" cy="17" r="2"/><path d="M13 3v5h5"/></svg>
     <span id="t-tabCar">豪車</span>
   </button>
-  <button class="tab" id="btn-svc" onclick="switchTab('svc')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span id="t-tabSvc">服務</span>
+
+  <button class="tab" id="btn-member" onclick="switchTab('member')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 018 0v2"/></svg>
+    <span id="t-tabMember">會員</span>
   </button>
   <button class="tab" id="btn-msg" onclick="switchTab('msg')" style="position:relative;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -634,7 +748,7 @@ function applyLang() {
     'back':'t-back2','contactDriver':'t-contactDriver',
     'conciergeService':'t-conciergeService','conciergeName':'t-conciergeName','online':'t-online',
     'tabHome':'t-tabHome','tabSpa':'t-tabSpa','tabCar':'t-tabCar',
-    'tabSvc':'t-tabSvc','tabMsg':'t-tabMsg',
+    'tabMsg':'t-tabMsg',
     'svcTitle':'t-svcTitle','svcSub':'t-svcSub','svcIntro':'t-svcIntro',
     'spaLabel':'t-spaLabel2'
   };
@@ -701,7 +815,7 @@ function closeLang() { document.getElementById('lang-overlay').style.display = '
 
 // ── Tab Switch ────────────────────────────────────────
 function switchTab(tab) {
-  var tabs = ['home','spa','car','svc','msg'];
+  var tabs = ['home','spa','car','member','msg'];
   tabs.forEach(function(id) {
     var t = document.getElementById('tab-'+id);
     var b = document.getElementById('btn-'+id);
@@ -728,9 +842,6 @@ function switchTab(tab) {
   } else if (tab === 'spa') {
     target.style.display = 'block';
     showSpaList();
-  } else if (tab === 'svc') {
-    target.style.display = 'block';
-    buildSvcPage();
   } else {
     target.style.display = 'block';
   }
@@ -1033,6 +1144,86 @@ function buildSvcPage() {
   var pad = function(n){ return (n<10?'0':'')+n; };
   document.getElementById('car-date').value = y+'-'+pad(mo+1)+'-'+pad(today.getDate());
 })();
+
+
+// ── Member / OTP ─────────────────────────────────────
+var selectedRegionCode = '+853';
+var currentPhone = '';
+var mockOTP = '';
+var isLoggedIn = false;
+
+function selectRegion(el) {
+  document.querySelectorAll('.region-btn').forEach(function(b) {
+    b.classList.remove('active'); b.style.borderColor = '';
+  });
+  el.classList.add('active'); el.style.borderColor = '#C9A84C';
+  selectedRegionCode = el.getAttribute('data-code');
+  var codeEl = el.querySelectorAll('p')[2];
+  if (codeEl) codeEl.style.color = '#C9A84C';
+  document.getElementById('selected-code').textContent = selectedRegionCode;
+}
+
+function sendOTP() {
+  var phone = document.getElementById('phone-input').value.trim();
+  if (!phone || phone.length < 5) { showToast('請輸入有效手機號碼'); return; }
+  currentPhone = selectedRegionCode + ' ' + phone;
+  mockOTP = Math.floor(100000 + Math.random() * 900000).toString();
+  document.getElementById('otp-phone-display').textContent = currentPhone;
+  document.getElementById('phone-step').style.display = 'none';
+  document.getElementById('otp-step').style.display = 'block';
+  showToast('驗證碼已發送！');
+  // In demo: show the OTP (remove in production with real SMS)
+  setTimeout(function(){ showToast('測試碼：' + mockOTP); }, 1000);
+  document.getElementById('otp1').focus();
+}
+
+function otpNext(el, nextId) {
+  if (el.value.length >= 1 && nextId) {
+    document.getElementById(nextId).focus();
+  }
+}
+
+function verifyOTP() {
+  var entered = ['otp1','otp2','otp3','otp4','otp5','otp6'].map(function(id){
+    return document.getElementById(id).value;
+  }).join('');
+  if (entered.length < 6) { showToast('請輸入完整6位驗證碼'); return; }
+  if (entered === mockOTP) {
+    isLoggedIn = true;
+    document.getElementById('member-login-view').style.display = 'none';
+    document.getElementById('member-loggedin-view').style.display = 'block';
+    document.getElementById('member-phone').textContent = currentPhone;
+    var now = new Date();
+    document.getElementById('member-login-time').textContent =
+      (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+    showToast('登入成功！歡迎您 🎉');
+  } else {
+    showToast('驗證碼錯誤，請重試');
+    ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('otp1').focus();
+  }
+}
+
+function backToPhone() {
+  document.getElementById('otp-step').style.display = 'none';
+  document.getElementById('phone-step').style.display = 'block';
+  ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+}
+
+function logout() {
+  isLoggedIn = false;
+  currentPhone = '';
+  document.getElementById('member-loggedin-view').style.display = 'none';
+  document.getElementById('member-login-view').style.display = 'block';
+  document.getElementById('phone-input').value = '';
+  document.getElementById('phone-step').style.display = 'block';
+  document.getElementById('otp-step').style.display = 'none';
+  showToast('已登出');
+}
 
 // ── Init ──────────────────────────────────────────────
 chat = [{from:'in', text:T('g1'), time:ts()}, {from:'in', text:T('g2'), time:ts()}];
