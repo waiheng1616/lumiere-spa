@@ -1213,22 +1213,6 @@ function loadFirebase(callback) {
   document.head.appendChild(s1);
 }
 
-function setupRecaptcha(callback) {
-  // Always clear old recaptcha first
-  if (recaptchaVerifier) {
-    try { recaptchaVerifier.clear(); } catch(e){}
-    recaptchaVerifier = null;
-  }
-  // Clear the container
-  var container = document.getElementById('recaptcha-container');
-  if (container) container.innerHTML = '';
-  recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    size: 'invisible',
-    callback: function() { if(callback) callback(); }
-  });
-  recaptchaVerifier.render().then(function(){ if(callback) callback(); }).catch(function(){if(callback) callback();});
-}
-
 function sendOTP() {
   var phone = document.getElementById('phone-input').value.trim();
   if (!phone || phone.length < 5) { showToast('請輸入有效手機號碼'); return; }
@@ -1237,7 +1221,13 @@ function sendOTP() {
   btn.textContent = '發送中...';
   btn.disabled = true;
   loadFirebase(function() {
-    setupRecaptcha();
+    // Always create fresh recaptcha verifier
+    var container = document.getElementById('recaptcha-container');
+    container.innerHTML = '';
+    recaptchaVerifier = new firebase.auth.RecaptchaVerifier(container, {
+      size: 'invisible',
+      callback: function() {}
+    });
     firebase.auth().signInWithPhoneNumber(currentPhone, recaptchaVerifier)
       .then(function(confirmResult) {
         fbConfirmResult = confirmResult;
