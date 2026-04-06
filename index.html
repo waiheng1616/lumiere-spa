@@ -821,8 +821,8 @@ function buildSvcPage(){
 
 function switchTab(tab){
   ['home','spa','car','msg','svc'].forEach(function(id){
-    document.getElementById('tab-'+id).style.display='none';
-    document.getElementById('btn-'+id).classList.remove('active');
+    var _t=document.getElementById('tab-'+id);if(_t)_t.style.display='none';
+    var _b=document.getElementById('btn-'+id);if(_b)_b.classList.remove('active');
   });
   var t=document.getElementById('tab-'+tab);
   if(tab==='msg'){
