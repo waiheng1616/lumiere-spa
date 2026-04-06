@@ -380,6 +380,7 @@ p{color:#999;font-size:13px;line-height:1.5;}
         <div id="selected-code" style="background:#1e1e1e;border:0.5px solid #2a2a2a;border-radius:10px 0 0 10px;padding:12px 14px;color:#C9A84C;font-size:14px;font-weight:500;white-space:nowrap;">+853</div>
         <input id="phone-input" type="tel" class="phone-input" placeholder="輸入手機號碼"/>
       </div>
+      <div id="recaptcha-container"></div>
       <button class="btn btn-gold" onclick="sendOTP()" id="t-sendOTP">發送驗證碼</button>
     </div>
 
@@ -1146,10 +1147,11 @@ function buildSvcPage() {
 })();
 
 
-// ── Member / OTP ─────────────────────────────────────
+
+
+// ── Member UI helpers ────────────────────────────────
 var selectedRegionCode = '+853';
 var currentPhone = '';
-var mockOTP = '';
 var isLoggedIn = false;
 
 function selectRegion(el) {
@@ -1163,24 +1165,99 @@ function selectRegion(el) {
   document.getElementById('selected-code').textContent = selectedRegionCode;
 }
 
+function backToPhone() {
+  document.getElementById('otp-step').style.display = 'none';
+  document.getElementById('phone-step').style.display = 'block';
+  ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  if (recaptchaVerifier) {
+    try { recaptchaVerifier.clear(); } catch(e){}
+    recaptchaVerifier = null;
+  }
+}
+
+// ── Firebase Phone Auth ───────────────────────────────
+var firebaseConfig = {
+  apiKey: "AIzaSyDsbtz--s9LA89uZjoNqjJHZ_2NCO8V-n0",
+  authDomain: "lumiere-spa.firebaseapp.com",
+  projectId: "lumiere-spa",
+  storageBucket: "lumiere-spa.firebasestorage.app",
+  messagingSenderId: "635508644562",
+  appId: "1:635508644562:web:9356c9a23deed2848feb0b",
+  measurementId: "G-KCXL26RDKP"
+};
+
+var fbApp = null;
+var fbAuth = null;
+var fbConfirmResult = null;
+var recaptchaVerifier = null;
+var firebaseReady = false;
+
+function loadFirebase(callback) {
+  if (firebaseReady) { callback(); return; }
+  var s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
+  s1.onload = function() {
+    var s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js';
+    s2.onload = function() {
+      fbApp = firebase.initializeApp(firebaseConfig);
+      fbAuth = firebase.auth();
+      fbAuth.languageCode = 'zh-TW';
+      firebaseReady = true;
+      callback();
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+}
+
+function setupRecaptcha() {
+  if (recaptchaVerifier) return;
+  recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'invisible',
+    callback: function() {}
+  });
+}
+
 function sendOTP() {
   var phone = document.getElementById('phone-input').value.trim();
   if (!phone || phone.length < 5) { showToast('請輸入有效手機號碼'); return; }
-  currentPhone = selectedRegionCode + ' ' + phone;
-  mockOTP = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById('otp-phone-display').textContent = currentPhone;
-  document.getElementById('phone-step').style.display = 'none';
-  document.getElementById('otp-step').style.display = 'block';
-  showToast('驗證碼已發送！');
-  // In demo: show the OTP (remove in production with real SMS)
-  setTimeout(function(){ showToast('測試碼：' + mockOTP); }, 1000);
-  document.getElementById('otp1').focus();
-}
-
-function otpNext(el, nextId) {
-  if (el.value.length >= 1 && nextId) {
-    document.getElementById(nextId).focus();
-  }
+  currentPhone = selectedRegionCode + phone;
+  var btn = document.getElementById('t-sendOTP');
+  btn.textContent = '發送中...';
+  btn.disabled = true;
+  loadFirebase(function() {
+    setupRecaptcha();
+    firebase.auth().signInWithPhoneNumber(currentPhone, recaptchaVerifier)
+      .then(function(confirmResult) {
+        fbConfirmResult = confirmResult;
+        document.getElementById('otp-phone-display').textContent = currentPhone;
+        document.getElementById('phone-step').style.display = 'none';
+        document.getElementById('otp-step').style.display = 'block';
+        showToast('驗證碼已發送！');
+        document.getElementById('otp1').focus();
+        btn.textContent = '發送驗證碼';
+        btn.disabled = false;
+      })
+      .catch(function(error) {
+        console.error(error);
+        btn.textContent = '發送驗證碼';
+        btn.disabled = false;
+        if (error.code === 'auth/invalid-phone-number') {
+          showToast('電話號碼格式不正確');
+        } else if (error.code === 'auth/too-many-requests') {
+          showToast('請求次數過多，請稍後再試');
+        } else {
+          showToast('發送失敗：' + error.message);
+        }
+        if (recaptchaVerifier) {
+          recaptchaVerifier.clear();
+          recaptchaVerifier = null;
+        }
+      });
+  });
 }
 
 function verifyOTP() {
@@ -1188,43 +1265,55 @@ function verifyOTP() {
     return document.getElementById(id).value;
   }).join('');
   if (entered.length < 6) { showToast('請輸入完整6位驗證碼'); return; }
-  if (entered === mockOTP) {
-    isLoggedIn = true;
-    document.getElementById('member-login-view').style.display = 'none';
-    document.getElementById('member-loggedin-view').style.display = 'block';
-    document.getElementById('member-phone').textContent = currentPhone;
-    var now = new Date();
-    document.getElementById('member-login-time').textContent =
-      (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
-    showToast('登入成功！歡迎您 🎉');
-  } else {
-    showToast('驗證碼錯誤，請重試');
-    ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
-      document.getElementById(id).value = '';
+  if (!fbConfirmResult) { showToast('請先發送驗證碼'); return; }
+  var btn = document.getElementById('t-verifyOTP');
+  btn.textContent = '驗證中...';
+  btn.disabled = true;
+  fbConfirmResult.confirm(entered)
+    .then(function(result) {
+      isLoggedIn = true;
+      var user = result.user;
+      document.getElementById('member-login-view').style.display = 'none';
+      document.getElementById('member-loggedin-view').style.display = 'block';
+      document.getElementById('member-phone').textContent = user.phoneNumber || currentPhone;
+      var now = new Date();
+      document.getElementById('member-login-time').textContent =
+        (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+      showToast('登入成功！歡迎您 🎉');
+      btn.textContent = '確認驗證';
+      btn.disabled = false;
+    })
+    .catch(function(error) {
+      btn.textContent = '確認驗證';
+      btn.disabled = false;
+      if (error.code === 'auth/invalid-verification-code') {
+        showToast('驗證碼錯誤，請重試');
+      } else {
+        showToast('驗證失敗，請重試');
+      }
+      ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('otp1').focus();
     });
-    document.getElementById('otp1').focus();
-  }
-}
-
-function backToPhone() {
-  document.getElementById('otp-step').style.display = 'none';
-  document.getElementById('phone-step').style.display = 'block';
-  ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
-    document.getElementById(id).value = '';
-  });
 }
 
 function logout() {
+  if (fbAuth) fbAuth.signOut();
   isLoggedIn = false;
   currentPhone = '';
+  fbConfirmResult = null;
+  recaptchaVerifier = null;
   document.getElementById('member-loggedin-view').style.display = 'none';
   document.getElementById('member-login-view').style.display = 'block';
   document.getElementById('phone-input').value = '';
   document.getElementById('phone-step').style.display = 'block';
   document.getElementById('otp-step').style.display = 'none';
+  ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
   showToast('已登出');
 }
-
 // ── Init ──────────────────────────────────────────────
 chat = [{from:'in', text:T('g1'), time:ts()}, {from:'in', text:T('g2'), time:ts()}];
 applyLang();
