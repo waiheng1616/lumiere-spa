@@ -1221,10 +1221,12 @@ function sendOTP() {
   btn.textContent = '發送中...';
   btn.disabled = true;
   loadFirebase(function() {
-    // Always create fresh recaptcha verifier
-    var container = document.getElementById('recaptcha-container');
-    container.innerHTML = '';
-    recaptchaVerifier = new firebase.auth.RecaptchaVerifier(container, {
+    // Replace the container with a brand new DOM element
+    var oldEl = document.getElementById('recaptcha-container');
+    var newEl = document.createElement('div');
+    newEl.id = 'recaptcha-container';
+    oldEl.parentNode.replaceChild(newEl, oldEl);
+    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
       size: 'invisible',
       callback: function() {}
     });
