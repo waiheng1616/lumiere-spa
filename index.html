@@ -1213,12 +1213,20 @@ function loadFirebase(callback) {
   document.head.appendChild(s1);
 }
 
-function setupRecaptcha() {
-  if (recaptchaVerifier) return;
+function setupRecaptcha(callback) {
+  // Always clear old recaptcha first
+  if (recaptchaVerifier) {
+    try { recaptchaVerifier.clear(); } catch(e){}
+    recaptchaVerifier = null;
+  }
+  // Clear the container
+  var container = document.getElementById('recaptcha-container');
+  if (container) container.innerHTML = '';
   recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
     size: 'invisible',
-    callback: function() {}
+    callback: function() { if(callback) callback(); }
   });
+  recaptchaVerifier.render().then(function(){ if(callback) callback(); }).catch(function(){if(callback) callback();});
 }
 
 function sendOTP() {
